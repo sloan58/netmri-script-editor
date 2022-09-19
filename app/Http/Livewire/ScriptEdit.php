@@ -12,6 +12,7 @@ class ScriptEdit extends Component
     public ?string $modifiedScript;
     public string $sourceScript = '';
     public string $language;
+    public string $message;
 
     public function mount()
     {
@@ -32,14 +33,25 @@ class ScriptEdit extends Component
 
     public function saveScript()
     {
-        Http::withBasicAuth(env('NET_MRI_USER'), env('NET_MRI_PASSWORD'))
+        $response = Http::withBasicAuth(env('NET_MRI_USER'), env('NET_MRI_PASSWORD'))
             ->withOptions(["verify" => false])
             ->get(sprintf('https://%s/api/3.8/scripts/update', env('NET_MRI_HOST')), [
                 'id' => $this->scriptId,
                 'script_file' => $this->modifiedScript,
                 'language' => $this->language
-            ])
-            ->body();
+            ]);
+
+        if($response->successful()) {
+            $this->message = 'Script Updated Successfully!';
+            $this->sourceScript = $this->modifiedScript;
+            $this->modifiedScript = '';
+        } else {
+            $this->message = 'Sorry, there was a problem updating this script!';
+        }
+
+        $this->emit('updated', [
+            'success' => $response->successful()
+        ]);
     }
 
     public function codeUpdated($payload)
