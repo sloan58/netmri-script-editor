@@ -13,6 +13,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/edit/{netmri}/{scriptId}/{language}', \App\Http\Livewire\ScriptEdit::class)->name('script.edit');
+Route::get('/', \App\Http\Livewire\ScriptList::class)->name('script.list');
